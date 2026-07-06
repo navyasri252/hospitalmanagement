@@ -1,0 +1,28 @@
+# Generic Python ignores
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.log
+# Django specific
+*.sqlite3
+/staticfiles/
+/media/
+# Environment files
+.env
+# VSCode / IDE
+.vscode/
+# OS files
+.DS_Store
+Thumbs.db
+# Large unrelated directories (ignore whole folders)
+employeeemanagementsystem/
+mydjangoproject/
+myportfolio/
+myproject/
+MyCollegeProject/
+module 1/
+# Zip archives
+*.zip

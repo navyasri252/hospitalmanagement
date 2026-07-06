@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: hospital-portal-demo
+    runtime: python
+    rootDir: hospitalmanagement
+    buildCommand: "pip install -r requirements.txt && python myproject/manage.py collectstatic --no-input && python myproject/manage.py migrate && python create_superuser.py"
+    startCommand: "gunicorn --chdir myproject wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: RENDER
+        value: "True"

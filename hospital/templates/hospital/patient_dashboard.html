@@ -1,0 +1,290 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aegis Health | Patient Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom Style System -->
+    <link rel="stylesheet" href="{% static 'hospital/css/styles.css' %}">
+  </head>
+  <body>
+    <!-- Sticky Glass Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-premium">
+      <div class="container">
+        <a class="navbar-brand navbar-brand-premium" href="{% url 'hospital:doctor_list' %}">
+          <i class="bi bi-heart-pulse-fill"></i>
+          <span>Aegis Health</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto gap-2">
+            <li class="nav-item">
+              <a class="nav-link nav-link-premium" href="{% url 'hospital:doctor_list' %}">
+                <i class="bi bi-person-heart me-1"></i>Browse Doctors
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-premium active" href="{% url 'hospital:patient_dashboard' %}">
+                <i class="bi bi-speedometer2 me-1"></i>Patient Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-premium" href="{% url 'hospital:admin_appointments' %}">
+                <i class="bi bi-shield-lock me-1"></i>Admin Panel
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container py-5">
+      <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+          <h1 class="fw-bold text-slate-800 mb-1">Patient Portal</h1>
+          <p class="text-muted mb-0">Retrieve and view your healthcare records, appointments, and consultation medical reports.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <a href="{% url 'hospital:doctor_list' %}" class="btn btn-premium-outline">
+            <i class="bi bi-plus-lg me-1"></i>Book New Appointment
+          </a>
+        </div>
+      </div>
+
+      <!-- Credential Lookup Card -->
+      <div class="card card-premium shadow-sm border-0 mb-5">
+        <div class="card-body p-4">
+          <h5 class="fw-bold text-slate-800 mb-3"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Access Records Verification</h5>
+          <form method="get" class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label text-muted small fw-semibold">Patient Name</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                <input type="text" name="patient_name" value="{{ patient_name }}" class="form-control" placeholder="Enter registered name" required>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label text-muted small fw-semibold">Phone Number</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
+                <input type="text" name="patient_phone" value="{{ patient_phone }}" class="form-control" placeholder="Enter registered phone number" required>
+              </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-premium-primary w-100 py-2">
+                <i class="bi bi-search me-1"></i>Fetch Records
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {% if patient_name and patient_phone %}
+        {% if appointments %}
+          <!-- Stats Summary Counters -->
+          <div class="row g-4 mb-5">
+            <div class="col-md-4">
+              <div class="stat-counter-card">
+                <div class="stat-icon bg-primary-light text-primary">
+                  <i class="bi bi-calendar2-range"></i>
+                </div>
+                <div>
+                  <div class="stat-val text-primary" id="totalCount">{{ appointments.count }}</div>
+                  <div class="stat-lbl">Total Appointments</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-counter-card">
+                <div class="stat-icon bg-success-light text-success" style="background-color: #ecfdf5;">
+                  <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                  <div class="stat-val text-success" id="confirmedCount">0</div>
+                  <div class="stat-lbl">Confirmed Bookings</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-counter-card">
+                <div class="stat-icon bg-info-light text-info" style="background-color: #ecfeff;">
+                  <i class="bi bi-file-earmark-medical"></i>
+                </div>
+                <div>
+                  <div class="stat-val text-info" id="reportCount">0</div>
+                  <div class="stat-lbl">Medical Reports</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appointments List -->
+          <div class="card card-premium shadow-md border-0">
+            <div class="card-body p-0">
+              <div class="p-4 border-bottom">
+                <h5 class="fw-bold text-slate-800 mb-0"><i class="bi bi-list-stars text-primary me-2"></i>Consultation History</h5>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                      <th class="ps-4">Date</th>
+                      <th>Time Slot</th>
+                      <th>Consulting Doctor</th>
+                      <th>Status</th>
+                      <th>Reason</th>
+                      <th class="pe-4 text-end">Medical Records</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for appointment in appointments %}
+                      <tr data-status="{{ appointment.status }}" data-reports-count="{{ appointment.reports.count }}">
+                        <td class="ps-4">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-calendar-event text-primary"></i>
+                            <span class="fw-bold">{{ appointment.appointment_date }}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span class="badge bg-light text-dark border px-2 py-1.5"><i class="bi bi-clock me-1"></i>{{ appointment.time_slot }}</span>
+                        </td>
+                        <td>
+                          <div class="fw-bold">Dr. {{ appointment.doctor.name }}</div>
+                          <div class="small text-muted">{{ appointment.doctor.get_department_display }}</div>
+                        </td>
+                        <td>
+                          {% if appointment.status == 'PENDING' %}
+                            <span class="badge badge-status bg-warning bg-opacity-10 text-warning border border-warning-subtle">
+                              <i class="bi bi-hourglass-split me-1"></i>Pending Confirmation
+                            </span>
+                          {% elif appointment.status == 'CONFIRMED' %}
+                            <span class="badge badge-status bg-success bg-opacity-10 text-success border border-success-subtle">
+                              <i class="bi bi-check-circle-fill me-1"></i>Confirmed
+                            </span>
+                          {% elif appointment.status == 'COMPLETED' %}
+                            <span class="badge badge-status bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                              <i class="bi bi-flag-fill me-1"></i>Completed
+                            </span>
+                          {% else %}
+                            <span class="badge badge-status bg-danger bg-opacity-10 text-danger border border-danger-subtle">
+                              <i class="bi bi-x-circle-fill me-1"></i>Cancelled
+                            </span>
+                          {% endif %}
+                        </td>
+                        <td>
+                          <span class="text-truncate d-inline-block text-muted small" style="max-width: 150px;" title="{{ appointment.reason }}">
+                            {{ appointment.reason|default:'N/A' }}
+                          </span>
+                        </td>
+                        <td class="pe-4 text-end">
+                          {% if appointment.reports.exists %}
+                            {% for report in appointment.reports.all %}
+                              <button type="button" class="btn btn-sm btn-premium-primary" 
+                                      onclick="showMedicalReport('Dr. {{ appointment.doctor.name }}', '{{ appointment.appointment_date }}', '{{ report.report_text|escapejs }}')">
+                                <i class="bi bi-file-earmark-text me-1"></i>View Report
+                              </button>
+                            {% endfor %}
+                          {% else %}
+                            <span class="text-muted small">No report generated</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-info card-premium p-4 d-flex align-items-center gap-3">
+            <i class="bi bi-info-circle text-info fs-3"></i>
+            <div>
+              <h5 class="alert-heading fw-bold mb-1">No Appointments Found</h5>
+              <p class="mb-0 text-muted">We couldn't find any appointment records for <strong>{{ patient_name }}</strong> with phone number <strong>{{ patient_phone }}</strong>.</p>
+            </div>
+          </div>
+        {% endif %}
+      {% else %}
+        <!-- Dashboard Idle Welcome State -->
+        <div class="card card-premium text-center py-5 shadow-sm border-0">
+          <div class="card-body">
+            <div class="text-primary mb-4" style="font-size: 3.5rem;">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <h4 class="fw-bold text-slate-800 mb-2">Access Your Consultation History</h4>
+            <p class="text-muted mx-auto" style="max-width: 500px;">Please enter your registered patient name and phone number above to access schedules, statuses, and clinical medical reports.</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Medical Report View Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content card-premium border-0">
+          <div class="modal-header border-bottom bg-light">
+            <h5 class="modal-title fw-bold text-slate-800" id="modalTitle"><i class="bi bi-file-earmark-medical-fill text-primary me-2"></i>Medical Consultation Report</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="mb-3 d-flex justify-content-between text-muted small pb-2 border-bottom">
+              <div><strong>Doctor:</strong> <span id="modalDocName"></span></div>
+              <div><strong>Date:</strong> <span id="modalDate"></span></div>
+            </div>
+            <h6 class="fw-bold text-slate-800 mb-2">Clinical Findings & Prescription:</h6>
+            <div class="p-3 bg-light rounded border border-light-subtle font-monospace text-slate-700" style="white-space: pre-wrap;" id="modalText">
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // 1. Dynamic Stats Calculation in dashboard
+      document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tbody tr");
+        let confirmed = 0;
+        let reports = 0;
+
+        rows.forEach(row => {
+          const status = row.getAttribute("data-status");
+          const reportsCount = parseInt(row.getAttribute("data-reports-count") || "0");
+
+          if (status === 'CONFIRMED' || status === 'COMPLETED') {
+            confirmed++;
+          }
+          reports += reportsCount;
+        });
+
+        const confirmedCountEl = document.getElementById("confirmedCount");
+        const reportCountEl = document.getElementById("reportCount");
+        if (confirmedCountEl) confirmedCountEl.textContent = confirmed;
+        if (reportCountEl) reportCountEl.textContent = reports;
+      });
+
+      // 2. Open medical report modal
+      function showMedicalReport(doctor, date, text) {
+        document.getElementById('modalDocName').textContent = doctor;
+        document.getElementById('modalDate').textContent = date;
+        document.getElementById('modalText').textContent = text;
+        
+        const myModal = new bootstrap.Modal(document.getElementById('reportModal'));
+        myModal.show();
+      }
+    </script>
+  </body>
+</html>
