@@ -89,6 +89,23 @@
 
       {% if patient_name and patient_phone %}
         {% if appointments %}
+          <form method="get" class="row g-3 mb-4 align-items-end">
+            <input type="hidden" name="patient_name" value="{{ patient_name }}">
+            <input type="hidden" name="patient_phone" value="{{ patient_phone }}">
+            <div class="col-md-10">
+              <label class="form-label text-muted small fw-semibold">Search appointments</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search by doctor, department, status, or date">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-premium-primary w-100 py-2">
+                <i class="bi bi-search me-1"></i>Search
+              </button>
+            </div>
+          </form>
+
           <!-- Stats Summary Counters -->
           <div class="row g-4 mb-5">
             <div class="col-md-4">
