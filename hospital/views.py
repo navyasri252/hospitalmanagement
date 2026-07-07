@@ -1,6 +1,5 @@
 import json
 from datetime import date
-from urllib.parse import urlencode
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -144,12 +143,16 @@ class AppointmentCreateView(CreateView):
         return context
 
     def form_valid(self, form):
+        # Save the appointment and then redirect to the patient dashboard
+        # with the patient name and phone pre-filled in the query parameters.
+        # This ensures the newly booked appointment is visible by default.
         response = super().form_valid(form)
         patient = form.instance.patient
+        # Construct redirect URL with query parameters
         from django.urls import reverse
         dashboard_url = reverse('hospital:patient_dashboard')
-        query_params = urlencode({'patient_name': patient.name, 'patient_phone': patient.phone})
-        return redirect(f"{dashboard_url}?{query_params}")
+        query_params = f"?patient_name={patient.name}&patient_phone={patient.phone}"
+        return redirect(dashboard_url + query_params)
 
 
 
