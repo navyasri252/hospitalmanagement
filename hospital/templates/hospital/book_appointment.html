@@ -140,8 +140,7 @@
                 <!-- Standard date picker linked with django form -->
                 {{ form.appointment_date }}
                 {% if form.appointment_date.errors %}
-                <div class="text-danger small mt-1">{% for error in form.appointment_date.errors %}{{ error }}{% endfor
-                  %}</div>
+                <div class="text-danger small mt-1">{% for error in form.appointment_date.errors %}{{ error }}{% endfor %}</div>
                 {% endif %}
               </div>
 
