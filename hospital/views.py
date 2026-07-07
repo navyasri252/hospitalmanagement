@@ -139,8 +139,17 @@ class AppointmentCreateView(CreateView):
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, 'Appointment request submitted successfully.')
-        return super().form_valid(form)
+        # Save the appointment and then redirect to the patient dashboard
+        # with the patient name and phone pre-filled in the query parameters.
+        # This ensures the newly booked appointment is visible by default.
+        response = super().form_valid(form)
+        patient = form.instance.patient
+        # Construct redirect URL with query parameters
+        from django.urls import reverse
+        dashboard_url = reverse('hospital:patient_dashboard')
+        query_params = f"?patient_name={patient.name}&patient_phone={patient.phone}"
+        return redirect(dashboard_url + query_params)
+
 
 
 class PatientDashboardView(ListView):
