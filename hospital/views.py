@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django import forms
+from django.db.models import Q
 
 from .models import Doctor, Appointment, Patient, MedicalReport
 
@@ -64,7 +65,10 @@ class DoctorListView(ListView):
         if department:
             queryset = queryset.filter(department=department)
         if search:
-            queryset = queryset.filter(name__icontains=search) | queryset.filter(specialization__icontains=search)
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(specialization__icontains=search)
+            )
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -158,17 +162,45 @@ class PatientDashboardView(ListView):
     context_object_name = 'appointments'
 
     def get_queryset(self):
-        query = super().get_queryset().order_by('-appointment_date', '-created_at')
-        patient_name = self.request.GET.get('patient_name')
-        patient_phone = self.request.GET.get('patient_phone')
+        queryset = Appointment.objects.all().order_by('-appointment_date', '-created_at')
+
+        patient_name = self.request.GET.get('patient_name', '').strip()
+        patient_phone = self.request.GET.get('patient_phone', '').strip()
+        search = self.request.GET.get('search', '').strip()
+
         if patient_name and patient_phone:
-            return query.filter(patient__name__icontains=patient_name, patient__phone__icontains=patient_phone)
-        return query.none()
+            queryset = queryset.filter(
+                patient__name__iexact=patient_name,
+                patient__phone=patient_phone
+            )
+        else:
+            return Appointment.objects.none()
+
+        if search:
+            queryset = queryset.filter(
+                Q(doctor__name__icontains=search) |
+                Q(doctor__specialization__icontains=search) |
+                Q(doctor__department__icontains=search) |
+                Q(status__icontains=search) |
+                Q(appointment_date__icontains=search)
+            )
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        appointments = context['appointments']
+
         context['patient_name'] = self.request.GET.get('patient_name', '')
         context['patient_phone'] = self.request.GET.get('patient_phone', '')
+        context['search'] = self.request.GET.get('search', '')
+
+        context['total_count'] = appointments.count()
+        context['confirmed_count'] = appointments.filter(status='CONFIRMED').count()
+        context['completed_count'] = appointments.filter(status='COMPLETED').count()
+        context['pending_count'] = appointments.filter(status='PENDING').count()
+        context['cancelled_count'] = appointments.filter(status='CANCELLED').count()
+
         return context
 
 

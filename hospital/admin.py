@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Doctor, Patient, Appointment, MedicalReport
 
+admin.site.site_header = 'Hospital Management'
+admin.site.site_title = 'Hospital Management Admin'
+admin.site.index_title = 'Hospital Management Dashboard'
+
 
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
